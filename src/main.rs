@@ -1,3 +1,4 @@
+use std::io::Write;
 use clap::{value_parser, Arg, Command as ClapCommand};
 use serde::{Deserialize, Serialize};
 use aws_config::{BehaviorVersion, Region};
@@ -49,6 +50,14 @@ struct AWSConfig {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     env_logger::builder()
+        .format(|buf, record| {
+            writeln!(
+                buf,
+                "{} {}",
+                Local::now().format("%Y-%m-%d %H:%M:%S"),
+                record.args()
+            )
+        })
         .filter_level(LevelFilter::Trace)
         .init();
 
