@@ -1,0 +1,23 @@
+[package]
+name = "atm-rust"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+aws-config = { version= "1.8.14", features = ["behavior-version-latest"] }
+aws-sdk-lightsail = "1.100.0"
+aws-smithy-types = "1.4.4"
+aws-smithy-types-convert = { version = "0.60.13", features = ["convert-chrono"] }
+byte-unit = "5.2.0"
+chrono = "0.4.43"
+clap = "4.5.58"
+env_logger = "0.11.9"
+log = "0.4.29"
+serde = { version = "1.0.228", features = ["derive"]  }
+serde_json = "1.0.149"
+tokio = { version = "1.49.0", features = ["full"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true
