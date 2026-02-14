@@ -61,7 +61,6 @@ Each entry in the configuration array represents a monitored instance with:
 - `Name`: Instance identifier
 - `Limit`: Traffic limit with unit and value
 - `Command`: Array of commands to execute when limit is reached
-    - Use `"shutdown"` to force shutdown the instance via AWS API
 
 ## Supported Services
 
