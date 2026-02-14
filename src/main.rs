@@ -174,9 +174,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
 
                 } else {
-                    let left = Byte::from_u64(limit_byte.as_u64() - byte.as_u64())
+                    let byte_u64 = byte.as_u64();
+                    let limit_byte_u64 = limit_byte.as_u64();
+                    let left = Byte::from_u64(limit_byte_u64 - byte_u64)
                         .get_appropriate_unit(UnitType::Decimal);
-                    let percentage = (byte.as_u64() as f64 / limit_byte.as_u64() as f64) * 100.0;
+                    let percentage = ((limit_byte_u64 - byte_u64) as f64 / limit_byte_u64 as f64) * 100.0;
                     info!("Traffic Left: {:.2} ({:.2}%)", left, percentage);
                 }
             }
