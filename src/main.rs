@@ -93,9 +93,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let client = Client::new(&shared_config);
 
-    let today = Local::now().date_naive();
-    let (fdt, ldt, period) = first_and_last_day_of_month(today);
-
     let metric_names = vec![
         InstanceMetricName::NetworkIn,
         InstanceMetricName::NetworkOut
@@ -105,6 +102,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .map(|secs| time::Duration::from_secs(secs as u64));
 
     loop {
+        let today = Local::now().date_naive();
+        let (fdt, ldt, period) = first_and_last_day_of_month(today);
+
         info!("----------");
         for instance in &config.instance_list {
             info!("Instance: {}", instance.name);
