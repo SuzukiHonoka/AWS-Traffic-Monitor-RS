@@ -5,6 +5,14 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Least privilege by default; publish elevates only what it needs.
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     name: Build Linux binaries
@@ -61,44 +69,37 @@ jobs:
           path: release/atm-rust-linux-${{ matrix.artifact }}
 
   publish:
-    name: Tag and publish release
+    name: Publish GitHub Release
     needs: build
     runs-on: ubuntu-latest
+    # Create tag + release + assets via the GitHub API (no git push).
+    permissions:
+      contents: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           path: release
-
-      - name: Configure Git user
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          merge-multiple: true
 
       - name: Set release tag
-        id: tag
+        id: meta
         run: |
           DATE=$(date -u +%Y.%m.%d)
           SHORT_SHA=${GITHUB_SHA:0:7}
-          RELEASE_TAG=v${DATE}-${SHORT_SHA}
-          echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
-          echo "Release tag will be $RELEASE_TAG"
+          RELEASE_TAG="v${DATE}-${SHORT_SHA}"
+          echo "tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "Release tag: ${RELEASE_TAG}"
+          ls -la release
 
-      - name: Create and push tag
-        run: |
-          git tag "${{ steps.tag.outputs.release_tag }}"
-          git push origin "${{ steps.tag.outputs.release_tag }}"
-
-      - name: Publish assets to GitHub Release
-        uses: softprops/action-gh-release@v1
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tag.outputs.release_tag }}
-          name: ${{ steps.tag.outputs.release_tag }}
-          files: release/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ${{ steps.meta.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            release/atm-rust-linux-amd64
+            release/atm-rust-linux-arm64
