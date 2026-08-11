@@ -7,7 +7,7 @@ edition = "2024"
 aws-config = { version= "1.8.14", features = ["behavior-version-latest"] }
 aws-sdk-lightsail = "1.100.0"
 aws-smithy-types = "1.4.4"
-aws-smithy-types-convert = { version = "0.60.13", features = ["convert-chrono"] }
+aws-smithy-types-convert = { version = "0.61.1", features = ["convert-chrono"] }
 byte-unit = "5.2.0"
 chrono = "0.4.43"
 clap = "4.5.58"
