@@ -34,10 +34,12 @@ jobs:
           override: true
 
       - name: Install Zig
-        run: |
-          ZIG_VERSION=0.15.0
-          curl -L https://ziglang.org/install.sh | bash -s -- "$ZIG_VERSION"
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        uses: mlugg/setup-zig@v2
+        with:
+          # 0.15.0 was retracted; pin a real release for reproducible CI.
+          version: 0.16.0
+          # Distinguish matrix jobs in the Zig cache key.
+          cache-key: ${{ matrix.target }}
 
       - name: Install cargo-zigbuild
         run: cargo install cargo-zigbuild --locked
