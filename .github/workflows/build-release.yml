@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu]
+        target: [x86_64-linux-gnu, aarch64-linux-gnu]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -33,11 +33,16 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Install cross
-        run: cargo install cross --locked
+      - name: Install Zig
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zig
+
+      - name: Install cargo-zigbuild
+        run: cargo install cargo-zigbuild --locked
 
       - name: Build release binary
-        run: cross build --release --target ${{ matrix.target }}
+        run: cargo zigbuild --release --target ${{ matrix.target }}
 
       - name: Package artifact
         run: |
@@ -75,19 +80,20 @@ jobs:
         run: |
           DATE=$(date -u +%Y.%m.%d)
           SHORT_SHA=${GITHUB_SHA:0:7}
-          echo "RELEASE_TAG=v${DATE}-${SHORT_SHA}" >> $GITHUB_ENV
+          RELEASE_TAG=v${DATE}-${SHORT_SHA}
+          echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
           echo "Release tag will be $RELEASE_TAG"
 
       - name: Create and push tag
         run: |
-          git tag "$RELEASE_TAG"
-          git push origin "$RELEASE_TAG"
+          git tag "${{ steps.tag.outputs.release_tag }}"
+          git push origin "${{ steps.tag.outputs.release_tag }}"
 
       - name: Publish assets to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ env.RELEASE_TAG }}
-          name: ${{ env.RELEASE_TAG }}
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          name: ${{ steps.tag.outputs.release_tag }}
           files: release/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
