@@ -35,8 +35,9 @@ jobs:
 
       - name: Install Zig
         run: |
-          sudo apt-get update
-          sudo apt-get install -y zig
+          ZIG_VERSION=0.15.0
+          curl -L https://ziglang.org/install.sh | bash -s -- "$ZIG_VERSION"
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install cargo-zigbuild
         run: cargo install cargo-zigbuild --locked
